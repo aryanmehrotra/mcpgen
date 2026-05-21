@@ -1,0 +1,34 @@
+# Build artifacts
+/bin/
+/gofr-mcp
+*.exe
+*.test
+*.out
+
+# Go
+*.prof
+coverage.txt
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local state (may contain command transcripts with secrets)
+.claude/
+
+# Planning DB
+.plandb.db
+.plandb.db-journal
+
+# Local config / caches (these often hold tokens)
+*.cache.json
+cache.json
+.env
+.env.*
+!.env.example

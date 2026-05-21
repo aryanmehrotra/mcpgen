@@ -1,0 +1,25 @@
+spec:
+  url: https://api.eazyupdates.com/.well-known/openapi.json
+
+server:
+  name: eazyupdates-mcp
+  version: 0.1.0
+  base_url: https://api.eazyupdates.com
+
+auth:
+  provider: refresh_token
+  refresh_token:
+    refresh_endpoint: https://api.eazyupdates.com/login/refreshToken
+    refresh_in: header                       # eazyupdates wants the token in a header
+    refresh_token_field: refreshToken        # header name (and JSON field if refresh_in=body)
+    access_token_field: accessToken
+    cache_path: ~/.config/eazyupdate-mcp/cache.json
+    bootstrap_env: EAZYUPDATES_REFRESH_TOKEN
+
+filter:
+  # Keep the tool list focused on the workflow you actually use.
+  # Drop or extend these to widen scope.
+  include_tags:
+    - Update Controller
+    - Employee Controller
+    - Project Controller

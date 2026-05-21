@@ -1,0 +1,54 @@
+# mcpgen
+
+> Turn any OpenAPI / Swagger specification into a Model Context Protocol (MCP) server. A single Go binary exposes every operation in the spec as an MCP tool that AI assistants (Claude Code, Claude Desktop, Cursor, etc.) can call directly. Supports stdio, Streamable HTTP, and SSE transports. Pluggable auth — including first-class refresh-token flows for OAuth/SSO-backed APIs.
+
+The project is for users who want an AI assistant to call their REST APIs without writing per-API integration code. Drop in YAML config, run `mcpgen serve`, your AI now has tools.
+
+## Install
+
+- [`go install`](https://github.com/aryanmehrotra/mcpgen#install): `go install github.com/aryanmehrotra/mcpgen/cmd/mcpgen@latest` — needs Go 1.26+.
+- [Prebuilt binary](https://github.com/aryanmehrotra/mcpgen/releases/latest): download the archive for your OS/arch, extract `mcpgen` into your `$PATH`.
+- [From source](https://github.com/aryanmehrotra/mcpgen#install): `git clone` + `make install`.
+
+## Minimum config
+
+```yaml
+spec: { url: https://api.example.com/openapi.json }
+auth: { provider: bearer_static, bearer_static: { token_env: API_TOKEN } }
+filter: { include_tags: [Users, Orders] }
+```
+
+```sh
+mcpgen serve --config=config.yaml          # stdio, default
+mcpgen serve --config=config.yaml --transport=http --addr=:8080
+mcpgen serve --config=config.yaml --transport=sse  --addr=:8081
+```
+
+## Wire into Claude Code
+
+```sh
+claude mcp add my-api -e API_TOKEN=… -- mcpgen serve --config=$(pwd)/config.yaml
+```
+
+## Auth providers
+
+- `bearer_static` — static token from env var.
+- `api_key` — header / query / cookie key.
+- `refresh_token` — OAuth/SSO refresh-token flow with disk-cached access tokens and proactive cron refresh.
+- `none` — no auth.
+
+## Docs
+
+- [README](https://github.com/aryanmehrotra/mcpgen/blob/main/README.md): hero example, why it exists, full config reference, architecture, prior art.
+- [eazyupdates example](https://github.com/aryanmehrotra/mcpgen/blob/main/examples/eazyupdates/README.md): working reference against a ~200-endpoint production API behind Google SSO.
+- [Releases](https://github.com/aryanmehrotra/mcpgen/releases): prebuilt binaries, changelog.
+- [LICENSE](https://github.com/aryanmehrotra/mcpgen/blob/main/LICENSE): MIT.
+
+## Source layout (for contributors)
+
+- `cmd/mcpgen/` — CLI entrypoint (`serve`, `validate`, `tools` subcommands).
+- `pkg/spec/` — OpenAPI v3 loader.
+- `pkg/tools/` — spec → MCP tool translator (tag/op filter, body flattening, `$ref` inlining).
+- `pkg/auth/` — pluggable auth providers.
+- `pkg/upstream/` — HTTP transport (stdlib + GoFr-instrumented).
+- `pkg/mcpsrv/` — MCP server wiring (mark3labs/mcp-go); supports stdio / Streamable HTTP / SSE.

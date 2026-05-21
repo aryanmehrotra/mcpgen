@@ -1,0 +1,100 @@
+# See https://goreleaser.com/customization/
+version: 2
+
+project_name: mcpgen
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: mcpgen
+    main: ./cmd/mcpgen
+    binary: mcpgen
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Os "darwin" }}macos{{- else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "amd64" }}x86_64{{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+      - examples/**/*
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Bug fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: aryanmehrotra
+    name: mcpgen
+  draft: false
+  prerelease: auto
+  header: |
+    ## mcpgen {{ .Tag }}
+
+    OpenAPI / Swagger → MCP server. One YAML, one binary, three transports.
+
+    ### Install
+
+    ```sh
+    # Go users (any platform):
+    go install github.com/aryanmehrotra/mcpgen/cmd/mcpgen@{{ .Tag }}
+
+    # macOS / Linux — grab a prebuilt binary from below and drop it in $PATH.
+    ```
+
+# Homebrew tap is enabled once the tap repo + HOMEBREW_TAP_GITHUB_TOKEN
+# secret are set up. Until then, comment this out or releases will fail.
+# brews:
+#   - repository:
+#       owner: aryanmehrotra
+#       name: homebrew-tap
+#       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+#     name: mcpgen
+#     homepage: https://github.com/aryanmehrotra/mcpgen
+#     description: OpenAPI → MCP server. One YAML, one binary, three transports.
+#     license: MIT
+#     install: |
+#       bin.install "mcpgen"
+#     test: |
+#       system "#{bin}/mcpgen", "--help"
