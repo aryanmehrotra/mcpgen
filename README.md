@@ -57,8 +57,9 @@ Drops the binary in `$(go env GOBIN)` (or `$HOME/go/bin`). Make sure that's in y
 Download the archive for your OS/arch from the [latest release](https://github.com/aryanmehrotra/mcpgen/releases/latest), extract `mcpgen`, and drop it in `$PATH`.
 
 ```sh
-# macOS arm64 example
-curl -sL https://github.com/aryanmehrotra/mcpgen/releases/latest/download/mcpgen_v1.0.0_macos_arm64.tar.gz | tar xz
+# Pick the asset for your OS/arch from the Releases page, e.g. for macOS arm64:
+VERSION=$(curl -fsSL https://api.github.com/repos/aryanmehrotra/mcpgen/releases/latest | sed -n 's/.*"tag_name": *"v\(.*\)".*/\1/p')
+curl -fsSL "https://github.com/aryanmehrotra/mcpgen/releases/latest/download/mcpgen_${VERSION}_macos_arm64.tar.gz" | tar xz
 sudo mv mcpgen /usr/local/bin/
 ```
 
