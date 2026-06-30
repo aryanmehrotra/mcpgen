@@ -1,0 +1,21 @@
+spec:
+  url: https://xquik.com/openapi.json
+
+server:
+  name: xquik-mcp
+  version: 0.1.0
+  transport: stdio
+  base_url: https://xquik.com
+
+auth:
+  provider: api_key
+  api_key:
+    in: header
+    name: x-api-key
+    value_env: XQUIK_API_KEY
+
+filter:
+  include_tags:
+    - Tweets
+    - Users
+    - Trends
